@@ -2,111 +2,60 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Agile Price</title>
+    <title>Agile Dashboard</title>
     <meta http-equiv="refresh" content="1800">
-    <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0">
-    <meta http-equiv="expires" content="0">
-    <meta http-equiv="pragma" content="no-cache">
-    
     <style>
-        body {
-            background-color: white;
-            color: black;
-            font-family: "Helvetica", "Arial", sans-serif;
-            text-align: center;
-            margin: 0;
-            padding-top: 15%;
-            overflow: hidden;
-        }
-        #price {
-            font-size: 180px;
-            font-weight: bold;
-            display: block;
-            line-height: 1;
-        }
-        #unit {
-            font-size: 40px;
-            font-weight: normal;
-        }
-        #time {
-            font-size: 24px;
-            margin-top: 40px;
-            color: #444;
-        }
-        #debug {
-            font-size: 12px;
-            color: #ccc;
-            margin-top: 20px;
-        }
+        body { background: white; color: black; font-family: sans-serif; text-align: center; padding-top: 15%; margin: 0; }
+        #price { font-size: 150px; font-weight: bold; line-height: 1; }
+        #unit { font-size: 40px; }
+        #time { font-size: 20px; margin-top: 30px; color: #666; }
     </style>
 </head>
 <body>
-
     <div id="price">--</div>
     <div id="unit">p/kWh</div>
-    <div id="time">Fetching data...</div>
-    <div id="debug"></div>
+    <div id="time">Loading...</div>
 
     <script>
-        (function() {
-            // Configuration: Region A, Agile Oct 2024
-            var region = "A";
-            var apiBase = "https://api.octopus.energy/v1/products/AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-" + region + "/standard-unit-rates/";
+        function updatePrice() {
+            // Using your specific Region A Octopus URL
+            var url = "https://api.octopus.energy/v1/products/AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-A/standard-unit-rates/";
             
-            // Cache buster to stop the Kobo from showing old data
-            var cb = new Date().getTime();
-            var url = apiBase + "?cb=" + cb;
-
-            // Use a CORS proxy if the direct request fails (uncomment if needed)
-            // url = "https://corsproxy.io/?" + encodeURIComponent(url);
-
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
-            
-            // Extra cache-killing headers
-            xhr.setRequestHeader("Cache-Control", "no-cache");
-            xhr.setRequestHeader("Pragma", "no-cache");
-
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        try {
-                            var data = JSON.parse(xhr.responseText);
-                            var now = new Date();
-                            var currentPrice = null;
+                        var data = JSON.parse(xhr.responseText);
+                        var now = new Date();
+                        var currentPrice = null;
 
-                            // Find the correct 30-minute slot
-                            for (var i = 0; i < data.results.length; i++) {
-                                var start = new Date(data.results[i].valid_from);
-                                var end = new Date(data.results[i].valid_to);
-                                
-                                if (now >= start && now < end) {
-                                    currentPrice = data.results[i].value_inc_vat;
-                                    break;
-                                }
+                        // Loop through slots to find the one for 'now'
+                        for (var i = 0; i < data.results.length; i++) {
+                            var start = new Date(data.results[i].valid_from);
+                            var end = new Date(data.results[i].valid_to);
+                            if (now >= start && now < end) {
+                                currentPrice = data.results[i].value_inc_vat;
+                                break;
                             }
-
-                            if (currentPrice !== null) {
-                                document.getElementById('price').innerHTML = currentPrice.toFixed(1);
-                                // Optional: make price lighter if it's high (for glanceable info)
-                                document.getElementById('price').style.color = (currentPrice > 25) ? "#777" : "#000";
-                            } else {
-                                document.getElementById('price').innerHTML = "??";
-                            }
-
-                            document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
-                        
-                        } catch (e) {
-                            document.getElementById('time').innerHTML = "Parse Error";
                         }
+
+                        if (currentPrice !== null) {
+                            document.getElementById('price').innerHTML = currentPrice.toFixed(1);
+                        } else {
+                            document.getElementById('price').innerHTML = "??";
+                        }
+                        document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
                     } else {
-                        document.getElementById('time').innerHTML = "HTTP Error: " + xhr.status;
+                        document.getElementById('time').innerHTML = "Status: " + xhr.status;
                     }
                 }
             };
             xhr.send();
-        })();
-    </script>
+        }
 
+        // Run the function immediately
+        updatePrice();
+    </script>
 </body>
 </html>
