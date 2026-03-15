@@ -18,44 +18,22 @@
 
     <script>
         function updatePrice() {
-            var api = "https://api.octopus.energy/v1/products/AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-A/standard-unit-rates/";
-            
-            // AllOrigins wraps the Octopus JSON in its own object to bypass 403 blocks
-            var url = "https://api.allorigins.win/get?url=" + encodeURIComponent(api + "?cb=" + new Date().getTime());
-            
+            var url = "https://script.google.com/macros/s/AKfycbyGDZtONwOZf7K-iq0F-wUjVMj8B4lCQVctEXKiUe2ho01P0l0llaRmpEO_DsiPWms/exec";
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.onreadystatechange = function () {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        // AllOrigins returns the data inside a "contents" string
-                        var wrapper = JSON.parse(xhr.responseText);
-                        var data = JSON.parse(wrapper.contents); 
-                        
+                        document.getElementById('price').innerHTML = xhr.responseText;
                         var now = new Date();
-                        var currentPrice = null;
-        
-                        for (var i = 0; i < data.results.length; i++) {
-                            var start = new Date(data.results[i].valid_from);
-                            var end = new Date(data.results[i].valid_to);
-                            if (now >= start && now < end) {
-                                currentPrice = data.results[i].value_inc_vat;
-                                break;
-                            }
-                        }
-        
-                        if (currentPrice !== null) {
-                            document.getElementById('price').innerHTML = currentPrice.toFixed(1);
-                        }
                         document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
                     } else {
-                        document.getElementById('time').innerHTML = "Proxy Status: " + xhr.status;
+                        document.getElementById('time').innerHTML = "Script Error: " + xhr.status;
                     }
                 }
             };
             xhr.send();
         }
-
         // Run the function immediately
         updatePrice();
     </script>
