@@ -13,23 +13,35 @@
     <div id="price">...</div>
     <div id="unit">p / kWh</div>
     <div id="time">Loading...</div>
+<script>
+var url = "https://api.octopus.energy/v1/products/AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-A/standard-unit-rates/";
+// Use the proxy if the raw URL stays on "Loading..."
+// var url = "https://corsproxy.io/?" + url;
 
-    <script>
-        var url = "https://api.octopus.energy/v1/products/AGILE-24-10-01/electricity-tariffs/E-1R-AGILE-24-10-01-A/standard-unit-rates/";
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-                var data = JSON.parse(xhr.responseText);
-                // Octopus returns latest rates first. result[0] is the "newest" price.
-                var currentPrice = data.results[0].value_inc_vat;
-                document.getElementById('price').innerHTML = currentPrice.toFixed(1);
-                
-                var now = new Date();
-                document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
+var xhr = new XMLHttpRequest();
+xhr.open("GET", url, true);
+xhr.onreadystatechange = function () {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+        var data = JSON.parse(xhr.responseText);
+        var now = new Date();
+        var currentPrice = "??";
+
+        // Loop through results to find the slot that is active "now"
+        for (var i = 0; i < data.results.length; i++) {
+            var start = new Date(data.results[i].valid_from);
+            var end = new Date(data.results[i].valid_to);
+            
+            if (now >= start && now < end) {
+                currentPrice = data.results[i].value_inc_vat;
+                break;
             }
-        };
-        xhr.send();
-    </script>
+        }
+
+        document.getElementById('price').innerHTML = typeof currentPrice === 'number' ? currentPrice.toFixed(1) : currentPrice;
+        document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
+    }
+};
+xhr.send();
+        </script>
 </body>
 </html>
