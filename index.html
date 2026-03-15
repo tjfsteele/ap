@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="900">
+    <title>Agile Price</title>
+    <style>
+        body {
+            background-color: white;
+            color: black;
+            font-family: "Courier New", Courier, monospace;
+            text-align: center;
+            margin: 0;
+            padding-top: 20%;
+        }
+        #price {
+            font-size: 180px;
+            font-weight: bold;
+            display: block;
+        }
+        #unit {
+            font-size: 50px;
+        }
+        #update {
+            font-size: 20px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="price">--.-</div>
+    <div id="unit">p/kWh</div>
+    <div id="update">Last Refresh: <span id="clock"></span></div>
+
+    <script>
+        // Set the clock so you know it's not frozen
+        var now = new Date();
+        document.getElementById('clock').innerHTML = now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
+
+        // Optional: In the future, we can add a simple API fetch here.
+        // For now, just change the "--.-" to a number in your GitHub file 
+        // to test if the Kobo actually refreshes.
+        document.getElementById('price').innerHTML = "12.4"; 
+    </script>
+
+</body>
+</html>
