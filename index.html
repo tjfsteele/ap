@@ -2,39 +2,50 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Agile Dashboard</title>
     <meta http-equiv="refresh" content="1800">
     <style>
-        body { background: white; color: black; font-family: sans-serif; text-align: center; padding-top: 15%; margin: 0; }
-        #price { font-size: 150px; font-weight: bold; line-height: 1; }
+        body { 
+            background: white; color: black; font-family: sans-serif; 
+            text-align: center; margin: 0; padding: 0;
+            display: flex; flex-direction: column; justify-content: center; height: 100vh;
+        }
+        #price-container { margin-bottom: 20px; }
+        #price { font-size: 180px; font-weight: bold; display: block; line-height: 0.9; }
         #unit { font-size: 40px; }
-        #time { font-size: 20px; margin-top: 30px; color: #666; }
+        #next-container { font-size: 35px; color: #444; margin-top: 40px; border-top: 2px solid #eee; padding-top: 20px; }
+        #time { font-size: 18px; color: #888; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div id="price">--</div>
-    <div id="unit">p/kWh</div>
+
+    <div id="price-container">
+        <span id="price">--</span>
+        <span id="unit">p/kWh</span>
+    </div>
+
+    <div id="next-container">
+        Next: <span id="next-price">--</span>p
+    </div>
+
     <div id="time">Loading...</div>
 
     <script>
         function updatePrice() {
-            var url = "https://script.google.com/macros/s/AKfycbyGDZtONwOZf7K-iq0F-wUjVMj8B4lCQVctEXKiUe2ho01P0l0llaRmpEO_DsiPWms/exec";
+            var url = "https://script.google.com/macros/s/AKfycbwDFU2-ampTwtNGdyjspoa_zRg6hFyQcHfwnQbuoGWkz8QYYVOhIO0JcZxLOByOfud1/exec";
             var xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.onreadystatechange = function () {
-                if (xhr.readyState == 4) {
-                    if (xhr.status == 200) {
-                        document.getElementById('price').innerHTML = xhr.responseText;
-                        var now = new Date();
-                        document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
-                    } else {
-                        document.getElementById('time').innerHTML = "Script Error: " + xhr.status;
-                    }
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var parts = xhr.responseText.split("|");
+                    document.getElementById('price').innerHTML = parts[0];
+                    document.getElementById('next-price').innerHTML = parts[1];
+                    
+                    var now = new Date();
+                    document.getElementById('time').innerHTML = "Updated: " + now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
                 }
             };
             xhr.send();
         }
-        // Run the function immediately
         updatePrice();
     </script>
 </body>
